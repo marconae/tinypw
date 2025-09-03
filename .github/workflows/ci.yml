@@ -20,62 +20,35 @@ jobs:
         with:
           fetch-depth: 0 # Sonar needs full history for PR decoration
 
-      # Cache Cargo registry and git index
-      - name: Cache Cargo registry
-        uses: actions/cache@v4
+      # Install Rust toolchain
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
+          components: clippy, rustfmt
 
-      # Cache Cargo bin (installed tools like cargo-llvm-cov, cargo-sonar)
-      - name: Cache Cargo bin
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-bin-
-
-      # Cache Rustup toolchains and components
-      - name: Cache rustup toolchains
-        uses: actions/cache@v4
-        with:
-          path: ~/.rustup
-          key: ${{ runner.os }}-rustup-stable
-          restore-keys: |
-            ${{ runner.os }}-rustup-
-
-      # Cache build artifacts (target directories)
-      - name: Cache Cargo target
-        uses: actions/cache@v4
-        with:
-          path: |
-            target
-            target/llvm-cov-target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-target-
-
-      # Install Rust
-      - name: Install Rust
-        run: rustup update stable
-
-      # Build & test tinypw
-      - name: Build
-        run: cargo build --all-targets --verbose
-      - name: Test
-        run: cargo test --all --verbose
-
-      # Setup coverage report
-      - name: Install & setup cargo-llvm-cov
+      # Install third party crates
+      - name: Setup 3rd party
         run: |
           cargo install cargo-llvm-cov
-          rustup component add clippy
           cargo install cargo-sonar
+
+      # Cache Rust artifacts
+      - uses: Swatinem/rust-cache@v2
+
+      # Sanity checks: make sure cargo is available
+      - run: |
+          rustc --version
+          cargo --version
+          cargo clippy --version
+
+      # Build & test tinypw
+      - name: Build & Test
+        run: |
+          cargo build --all-targets --verbose
+          cargo test --all --verbose
+
+      # Cargo Clippy & Sonar
+      - name: Run Cargo Clippy and Sonar
+        run: |
           cargo clippy --message-format json > my-clippy-report.json
           cargo sonar --clippy --clippy-path my-clippy-report.json        
 
@@ -84,14 +57,6 @@ jobs:
         run: |
           mkdir coverage/
           cargo llvm-cov --lcov --output-path coverage/lcov.info
-
-      - name: Upload lcov.info artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lcov.info
-          path: lcov.info
-          if-no-files-found: warn
-          retention-days: 7
 
       # SonarCloud scan (recommended action)
       - name: Sonar scan
