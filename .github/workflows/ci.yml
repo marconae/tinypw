@@ -20,9 +20,55 @@ jobs:
         with:
           fetch-depth: 0 # Sonar needs full history for PR decoration
 
+      # Cache Cargo registry and git index
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      # Cache Cargo bin (installed tools like cargo-llvm-cov, cargo-sonar)
+      - name: Cache Cargo bin
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-bin-
+
+      # Cache Rustup toolchains and components
+      - name: Cache rustup toolchains
+        uses: actions/cache@v4
+        with:
+          path: ~/.rustup
+          key: ${{ runner.os }}-rustup-stable
+          restore-keys: |
+            ${{ runner.os }}-rustup-
+
+      # Cache build artifacts (target directories)
+      - name: Cache Cargo target
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            target/llvm-cov-target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-
+
       # Install Rust
       - name: Install Rust
         run: rustup update stable
+
+      # Build & test tinypw
+      - name: Build
+        run: cargo build --all-targets --verbose
+      - name: Test
+        run: cargo test --all --verbose
 
       # Setup coverage report
       - name: Install & setup cargo-llvm-cov
@@ -31,21 +77,21 @@ jobs:
           rustup component add clippy
           cargo install cargo-sonar
           cargo clippy --message-format json > my-clippy-report.json
-          cargo sonar --clippy-path my-clippy-report.json        
-
-      # Cache build artifacts for speed
-      - uses: Swatinem/rust-cache@v2
-
-      # Build & test tinypw
-      - name: Build
-        run: cargo build --all-targets --verbose
-      - name: Test
-        run: cargo test --all --verbose
+          cargo sonar --clippy --clippy-path my-clippy-report.json        
 
       # Generate coverage
       - name: Generate coverage (lcov)
         run: |
-          cargo llvm-cov --lcov --output-path lcov.info
+          mkdir coverage/
+          cargo llvm-cov --lcov --output-path coverage/lcov.info
+
+      - name: Upload lcov.info artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcov.info
+          path: lcov.info
+          if-no-files-found: warn
+          retention-days: 7
 
       # SonarCloud scan (recommended action)
       - name: Sonar scan
