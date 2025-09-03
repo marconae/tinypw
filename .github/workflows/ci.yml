@@ -31,7 +31,7 @@ jobs:
           rustup component add clippy
           cargo install cargo-sonar
           cargo clippy --message-format json > my-clippy-report.json
-          cargo sonar --issues clippy --clippy-path my-clippy-report.json        
+          cargo sonar --clippy-path my-clippy-report.json        
 
       # Cache build artifacts for speed
       - uses: Swatinem/rust-cache@v2
