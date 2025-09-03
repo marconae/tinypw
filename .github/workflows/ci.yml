@@ -11,18 +11,40 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      pull-requests: write # Sonar: for PR decoration
     steps:
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
-    - uses: Swatinem/rust-cache@v2
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose --all-targets
-    - name: Run tests
-      run: cargo test --verbose --all
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Sonar needs full history for PR decoration
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Cache build artifacts for speed
+      - uses: Swatinem/rust-cache@v2
+
+      # Build & test
+      - name: Build
+        run: cargo build --all-targets --verbose
+      - name: Test
+        run: cargo test --all --verbose
+
+      # Coverage via cargo-llvm-cov (stable)
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov
+      - name: Generate coverage (lcov)
+        run: |
+          mkdir -p coverage
+          cargo llvm-cov --lcov --output-path coverage/lcov.info
+
+      # SonarCloud scan (recommended action)
+      - name: Sonar scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=.
