@@ -20,24 +20,32 @@ jobs:
         with:
           fetch-depth: 0 # Sonar needs full history for PR decoration
 
-      - uses: dtolnay/rust-toolchain@stable
+      # Install Rust
+      - name: Install Rust
+        run: rustup update stable
 
       # Cache build artifacts for speed
       - uses: Swatinem/rust-cache@v2
 
-      # Build & test
+      # Build & test tinypw
       - name: Build
         run: cargo build --all-targets --verbose
       - name: Test
         run: cargo test --all --verbose
 
-      # Coverage via cargo-llvm-cov (stable)
-      - name: Install cargo-llvm-cov
-        run: cargo install cargo-llvm-cov
+      # Setup coverage report
+      - name: Install & setup cargo-llvm-cov
+        run: |
+          cargo install cargo-llvm-cov
+          rustup component add clippy
+          cargo install cargo-sonar
+          cargo clippy --message-format json > my-clippy-report.json
+          cargo sonar --issues clippy --clippy-path my-clippy-report.json
+
+      # Generate coverage
       - name: Generate coverage (lcov)
         run: |
-          mkdir -p coverage
-          cargo llvm-cov --lcov --output-path coverage/lcov.info
+          cargo llvm-cov --lcov --output-path lcov.info
 
       # SonarCloud scan (recommended action)
       - name: Sonar scan
