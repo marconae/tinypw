@@ -29,10 +29,12 @@ jobs:
       - name: Setup 3rd party
         run: |
           cargo install cargo-llvm-cov
-          cargo install cargo-sonar
 
       # Cache Rust artifacts
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          cache-directories: ~/.cargo/bin
 
       # Sanity checks: make sure cargo is available
       - run: |
@@ -47,10 +49,10 @@ jobs:
           cargo test --all --verbose
 
       # Cargo Clippy & Sonar
-      - name: Run Cargo Clippy and Sonar
-        run: |
-          cargo clippy --message-format json > my-clippy-report.json
-          cargo sonar --clippy --clippy-path my-clippy-report.json        
+      #- name: Run Cargo Clippy and Sonar
+      #  run: |
+      #    cargo clippy --message-format json > my-clippy-report.json
+      #    cargo sonar --clippy --clippy-path my-clippy-report.json
 
       # Generate coverage
       - name: Generate coverage (lcov)
