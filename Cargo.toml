@@ -1,0 +1,16 @@
+[package]
+name = "tinypw"
+version = "0.1.0"
+edition = "2024"
+authors = ["Marco Naetlitz <marco@naetlitz.de>"]
+description = "Yet another tiny CLI tool to generate passwords"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yourusername/tinypw"
+homepage = "https://github.com/yourusername/tinypw"
+keywords = ["password", "cli", "generator"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+rand = "0.9.2"
+clap = { version = "4.5", features = ["derive"] }
