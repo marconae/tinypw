@@ -36,7 +36,7 @@ mod tests {
     #[test]
     fn test_exclude_similar_symbols() {
         let pw = RandomPassword::builder()
-            .exclude_similar_symbols(true)
+            .exclude_similar(true)
             .build();
 
         assert!(contains_none(&pw.base_string, password::SIMILAR_SYMBOLS));

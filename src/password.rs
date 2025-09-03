@@ -11,7 +11,7 @@ pub const DEFAULT_LENGTH: usize = 16;
 pub const DEFAULT_CHARACTER_MODE: CharacterMode = LowerUpper;
 pub const DEFAULT_INCLUDE_NUMBERS: bool = true;
 pub const DEFAULT_INCLUDE_SYMBOLS: bool = true;
-pub const DEFAULT_EXCLUDE_SIMILAR_SYMBOLS: bool = false;
+pub const DEFAULT_EXCLUDE_SIMILAR: bool = false;
 
 pub enum CharacterMode {
     Lower,
@@ -63,7 +63,7 @@ pub struct RandomPasswordBuilder {
     character_mode: CharacterMode,
     include_numbers: bool,
     include_symbols: bool,
-    exclude_similar_symbols: bool,
+    exclude_similar: bool,
     extra_chars: Vec<char>,
 }
 
@@ -74,7 +74,7 @@ impl Default for RandomPasswordBuilder {
             character_mode: DEFAULT_CHARACTER_MODE,
             include_numbers: DEFAULT_INCLUDE_NUMBERS,
             include_symbols: DEFAULT_INCLUDE_SYMBOLS,
-            exclude_similar_symbols: DEFAULT_EXCLUDE_SIMILAR_SYMBOLS,
+            exclude_similar: DEFAULT_EXCLUDE_SIMILAR,
             extra_chars: Vec::new(),
         }
     }
@@ -101,8 +101,8 @@ impl RandomPasswordBuilder {
         self
     }
 
-    pub fn exclude_similar_symbols(mut self, yes: bool) -> Self {
-        self.exclude_similar_symbols = yes;
+    pub fn exclude_similar(mut self, yes: bool) -> Self {
+        self.exclude_similar = yes;
         self
     }
 
@@ -130,7 +130,7 @@ impl RandomPasswordBuilder {
             base_string.push_str(SYMBOLS);
         }
 
-        if self.exclude_similar_symbols {
+        if self.exclude_similar {
             base_string.retain(|c| !SIMILAR_SYMBOLS.contains(c));
         }
 
