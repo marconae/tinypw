@@ -24,6 +24,15 @@ jobs:
       - name: Install Rust
         run: rustup update stable
 
+      # Setup coverage report
+      - name: Install & setup cargo-llvm-cov
+        run: |
+          cargo install cargo-llvm-cov
+          rustup component add clippy
+          cargo install cargo-sonar
+          cargo clippy --message-format json > my-clippy-report.json
+          cargo sonar --issues clippy --clippy-path my-clippy-report.json        
+
       # Cache build artifacts for speed
       - uses: Swatinem/rust-cache@v2
 
@@ -32,15 +41,6 @@ jobs:
         run: cargo build --all-targets --verbose
       - name: Test
         run: cargo test --all --verbose
-
-      # Setup coverage report
-      - name: Install & setup cargo-llvm-cov
-        run: |
-          cargo install cargo-llvm-cov
-          rustup component add clippy
-          cargo install cargo-sonar
-          cargo clippy --message-format json > my-clippy-report.json
-          cargo sonar --issues clippy --clippy-path my-clippy-report.json
 
       # Generate coverage
       - name: Generate coverage (lcov)
