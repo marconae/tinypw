@@ -1,6 +1,5 @@
 mod password;
 mod password_test;
-mod faulty;
 
 use std::process::ExitCode;
 use crate::password::{CharacterMode, RandomPassword, DEFAULT_LENGTH};
