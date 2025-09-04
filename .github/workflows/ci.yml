@@ -54,6 +54,12 @@ jobs:
           mkdir -p coverage
           cargo llvm-cov --workspace --all-features --lcov --output-path coverage/lcov.info
 
+      # Sanity check for LCOV
+      - run: |
+          f=$(sed -n 's/^SF:\(.*\)/\1/p' coverage/lcov.info | head -1)
+          echo "Sample file in LCOV: $f"
+          ls -l "$f" || true
+
       # Scan
       - name: Sonar scan
         uses: sonarsource/sonarqube-scan-action@v2
