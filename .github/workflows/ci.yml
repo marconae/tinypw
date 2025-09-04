@@ -54,20 +54,13 @@ jobs:
           mkdir -p coverage
           cargo llvm-cov --workspace --all-features --lcov --output-path coverage/lcov.info
 
-      # Sanity check for LCOV
-      - run: |
-          f=$(sed -n 's/^SF:\(.*\)/\1/p' coverage/lcov.info | head -1)
-          echo "Sample file in LCOV: $f"
-          ls -l "$f" || true
-
-      - name: List workspace contents
+      # Rewrite absolute source paths to the container mount point
+      - name: Rewrite LCOV paths for Sonar container
         run: |
-          echo "Current working dir: $(pwd)"
-          echo "GitHub workspace: $GITHUB_WORKSPACE"
-          echo "--- Files and directories (tree) ---"
-          ls -Rlah
-          echo "--- Full paths (find) ---"
-          find "$GITHUB_WORKSPACE" -type f -o -type d | sort          
+          echo "Host workspace: $GITHUB_WORKSPACE"
+          sed -i "s|$GITHUB_WORKSPACE|/github/workspace|g" coverage/lcov.info
+          # quick sanity: print first SF lines
+          sed -n 's/^SF:\(.*\)/\1/p' coverage/lcov.info | head -5      
 
       # Scan
       - name: Sonar scan
