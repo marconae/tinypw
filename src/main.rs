@@ -16,8 +16,7 @@ struct Args {
     #[arg(short = 'c', long = "clipboard", default_value_t = false)]
     to_clipboard: bool,
 
-    /// Mode: include u=uppercase l=lowercase s=symbols n=numbers
-    /// Default mode is: ulns
+    /// Mode: include u=uppercase l=lowercase s=symbols n=numbers e=exclude similars
     #[arg(short = 'm', long = "mode", default_value = "ulnse")]
     mode: String,
 

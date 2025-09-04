@@ -28,7 +28,8 @@ jobs:
       # Install third party crates
       - name: Setup 3rd party
         run: |
-          cargo install cargo-llvm-cov
+          cargo install cargo-sonar --locked
+          cargo install cargo-llvm-cov --locked
 
       # Cache Rust artifacts
       - uses: Swatinem/rust-cache@v2
@@ -42,9 +43,16 @@ jobs:
           cargo --version
           cargo clippy --version
 
+      # Build and test tinypw
+      - name: Build & Test
+        run: |
+          cargo build --all-targets --verbose
+          cargo test --all --verbose          
+
       # Clippy
-      - name: Clippy
-        run: cargo clippy --all-targets --all-features
+      - name: Run Clippy and collect report
+        run: |
+          cargo clippy --all-targets --all-features --message-format=json > clippy.json || true
 
       # Coverage
       - name: Generate coverage (LCOV)
@@ -62,18 +70,27 @@ jobs:
           # quick sanity: print first SF lines
           sed -n 's/^SF:\(.*\)/\1/p' coverage/lcov.info | head -5      
 
+      - name: Send to SonarCloud via cargo-sonar
+        if: always() # Sonar should run every time for PR checks
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        run: |
+          cargo-sonar --clippy --clippy-path clippy.json 
+
       # Scan
       - name: Sonar scan
+        if: always() # Sonar should run every time for PR checks
         uses: sonarsource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: >
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectKey=marconae_tinypw
-            -Dsonar.organization=marconae
-            -Dsonar.projectBaseDir=.
-            -Dsonar.rust.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.rust.clippy.disabled=true
-            -Dsonar.log.level=DEBUG
+#        with:
+#          args: >
+#            -Dsonar.host.url=https://sonarcloud.io
+#            -Dsonar.projectKey=marconae_tinypw
+#            -Dsonar.organization=marconae
+#            -Dsonar.projectBaseDir=.
+#            -Dsonar.rust.lcov.reportPaths=coverage/lcov.info
+#            -Dsonar.rust.clippy.disabled=true
+#            -Dsonar.log.level=DEBUG
