@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use password::{entropy_bits, strength_label};
     use crate::password;
     use crate::password::CharacterMode::{Lower, Upper};
     use crate::password::RandomPassword;
@@ -85,6 +86,22 @@ mod tests {
         assert!(extra_chars.iter().all(|c| pw.base_string.contains(*c)))
     }
 
+    // --- labels
+    #[test]
+    fn strength_label_consistency_with_entropy() {
+        // "abcd" -> entropy = 8.0 -> weak
+        assert_eq!(strength_label(entropy_bits(&"abcd".to_string())), "weak");
+
+        // 10 lowercase letters -> pool ~unique 10 -> 10*log2(10) ≈ 33.22 -> fair
+        assert_eq!(strength_label(entropy_bits(&"abcdefghij".to_string())), "fair");
+
+        // 12 lowercase distinct -> 12*log2(12) ≈ 42.78 -> good
+        assert_eq!(strength_label(entropy_bits(&"abcdefghijkl".to_string())), "good");
+
+        // 16 lowercase distinct -> 16*log2(16)=16*4=64 -> strong
+        assert_eq!(strength_label(entropy_bits(&"abcdefghijklmnop".to_string())), "strong");
+    }
+
     fn contains_all(a: &str, b: &str) -> bool {
         b.chars().all(|c| a.contains(c))
     }
@@ -92,5 +109,4 @@ mod tests {
     fn contains_none(a: &str, b: &str) -> bool {
         !contains_all(a, b)
     }
-
 }
