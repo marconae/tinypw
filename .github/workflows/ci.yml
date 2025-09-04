@@ -36,31 +36,22 @@ jobs:
           cache-on-failure: true
           cache-directories: ~/.cargo/bin
 
-      # Sanity checks: make sure cargo is available
+      # Sanity checks
       - run: |
           rustc --version
           cargo --version
           cargo clippy --version
 
-      # Build & test tinypw
-      - name: Build & Test
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Generate coverage (LCOV)
         run: |
-          cargo build --all-targets --verbose
-          cargo test --all --verbose
+          mkdir -p coverage
+          cargo llvm-cov --workspace --all-features --lcov \
+            --output-path coverage/lcov.info \
+            --llvm-cov-args="--path-equivalence=$(pwd),/github/workspace"
 
-      # Cargo Clippy & Sonar
-      #- name: Run Cargo Clippy and Sonar
-      #  run: |
-      #    cargo clippy --message-format json > my-clippy-report.json
-      #    cargo sonar --clippy --clippy-path my-clippy-report.json
-
-      # Generate coverage
-      - name: Generate coverage (lcov)
-        run: |
-          mkdir coverage/
-          cargo llvm-cov --lcov --output-path coverage/lcov.info
-
-      # SonarCloud scan (recommended action)
       - name: Sonar scan
         uses: sonarsource/sonarqube-scan-action@v2
         env:
@@ -68,4 +59,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: >
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectKey=marconae_tinypw
+            -Dsonar.organization=marconae
             -Dsonar.projectBaseDir=.
+            -Dsonar.rust.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.rust.clippy.disabled=true
+            -Dsonar.log.level=DEBUG
