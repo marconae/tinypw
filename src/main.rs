@@ -29,7 +29,12 @@ fn main() -> ExitCode {
     let args = Args::parse();
 
     let pw = get_random_password(args);
-    println!("{}", pw.generate());
+    let pw_str = pw.generate();
+    let strength = password::entropy_bits(&pw_str);
+
+    println!("Password: {}", pw_str);
+    println!("{}", render_strength_bar(strength));
+    println!("Entropy: {:.2} bits", strength);
 
     ExitCode::SUCCESS
 }
@@ -56,4 +61,46 @@ fn get_random_password(args: Args) -> RandomPassword {
         .include_symbols(include_symbols)
         .exclude_similar(exclude_similars)
         .build()
+}
+
+// Add this alongside your password helpers
+
+fn strength_color(label: &str) -> &'static str {
+    match label {
+        "weak" => "\x1b[31m",  // red
+        "fair" => "\x1b[33m",  // yellow
+        "good" => "\x1b[36m",  // cyan
+        _ => "\x1b[32m",       // green
+    }
+}
+
+fn strength_emoji(label: &str) -> &'static str {
+    match label {
+        "weak" => "😬",
+        "fair" => "😐",
+        "good" => "🙂",
+        _ => "😎",
+    }
+}
+
+/// Render a colored progress bar based on entropy (bits).
+/// Bar caps at 80 bits for visualization.
+fn render_strength_bar(entropy_bits: f64) -> String {
+    let cap = 90.0;
+    let pct = (entropy_bits / cap).clamp(0.0, 1.0);
+    let width = 24usize;
+    let filled = (pct * width as f64).round() as usize;
+
+    let filled_block = '█';
+    let empty_block = '░';
+
+    let label = password::strength_label(entropy_bits);
+    let color = strength_color(label);
+    let reset = "\x1b[0m";
+
+    let bar: String = std::iter::repeat(filled_block).take(filled)
+        .chain(std::iter::repeat(empty_block).take(width - filled))
+        .collect();
+
+    format!("{color}[{bar}] {reset}{:>5.1}% {label} {}", pct * 100.0, strength_emoji(label))
 }

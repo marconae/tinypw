@@ -51,6 +51,44 @@ impl RandomPassword {
     }
 }
 
+/// Calculate Shannon entropy (in bits) for passwords generated with this configuration.
+/// Assumes independent uniform selection over the configured character set.
+pub fn entropy_bits(str: &String) -> f64 {
+    let length = str.len() as f64;
+    let pool_size = unique_chars(str) as f64;
+    if length == 0.0 || pool_size <= 1.0 {
+        return 0.0;
+    }
+    length * pool_size.log2()
+}
+
+/// A simple qualitative label derived from entropy.
+/// Thresholds: <28 weak, <36 fair, <60 good, otherwise strong.
+pub fn strength_label(e: f64) -> &'static str {
+    if e < 28.0 {
+        "weak"
+    } else if e < 36.0 {
+        "fair"
+    } else if e < 60.0 {
+        "good"
+    } else {
+        "strong"
+    }
+}
+
+fn unique_chars(s: &str) -> usize {
+    let mut seen = [false; 256];
+    let mut count = 0usize;
+    for &b in s.as_bytes() {
+        let idx = b as usize;
+        if !seen[idx] {
+            seen[idx] = true;
+            count += 1;
+        }
+    }
+    count
+}
+
 impl core::fmt::Display for RandomPassword {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let s = self.generate();
@@ -146,3 +184,5 @@ impl RandomPasswordBuilder {
         }
     }
 }
+
+
