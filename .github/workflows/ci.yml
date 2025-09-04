@@ -42,16 +42,19 @@ jobs:
           cargo --version
           cargo clippy --version
 
+      # Clippy
       - name: Clippy
         run: cargo clippy --all-targets --all-features
 
+      # Coverage
       - name: Generate coverage (LCOV)
+        env:
+          LLVM_COV_FLAGS: --path-equivalence=${{ github.workspace }},/github/workspace
         run: |
           mkdir -p coverage
-          cargo llvm-cov --workspace --all-features --lcov \
-            --output-path coverage/lcov.info \
-            --llvm-cov-args="--path-equivalence=$(pwd),/github/workspace"
+          cargo llvm-cov --workspace --all-features --lcov --output-path coverage/lcov.info
 
+      # Scan
       - name: Sonar scan
         uses: sonarsource/sonarqube-scan-action@v2
         env:
