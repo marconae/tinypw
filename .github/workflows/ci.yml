@@ -28,7 +28,8 @@ jobs:
       # Install third party crates
       - name: Setup 3rd party
         run: |
-          cargo install cargo-llvm-cov
+          cargo install cargo-sonar --locked
+          cargo install cargo-llvm-cov --locked
 
       # Cache Rust artifacts
       - uses: Swatinem/rust-cache@v2
@@ -42,9 +43,16 @@ jobs:
           cargo --version
           cargo clippy --version
 
+      # Build and test tinypw
+      - name: Build & Test
+        run: |
+          cargo build --all-targets --verbose
+          cargo test --all --verbose          
+
       # Clippy
       - name: Run Clippy and collect report
-        run: cargo clippy --all-targets --all-features --message-format=json > clippy.json || true
+        run: |
+          cargo clippy --all-targets --all-features --message-format=json > clippy.json || true
 
       # Coverage
       - name: Generate coverage (LCOV)
@@ -68,20 +76,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
         run: |
-          cargo sonar \
-            --organization marconae \
-            --project marconae_tinypw \
-            --lcov-path coverage/lcov.info \
-            --clippy \
-            --clippy-path clippy.json
+          cargo-sonar --clippy --clippy-path clippy.json 
 
       # Scan
-#      - name: Sonar scan
-#        if: always() # Sonar should run every time for PR checks
-#        uses: sonarsource/sonarqube-scan-action@v2
-#        env:
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sonar scan
+        if: always() # Sonar should run every time for PR checks
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          args: >
 #            -Dsonar.host.url=https://sonarcloud.io
