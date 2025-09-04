@@ -60,6 +60,15 @@ jobs:
           echo "Sample file in LCOV: $f"
           ls -l "$f" || true
 
+      - name: List workspace contents
+        run: |
+          echo "Current working dir: $(pwd)"
+          echo "GitHub workspace: $GITHUB_WORKSPACE"
+          echo "--- Files and directories (tree) ---"
+          ls -Rlah
+          echo "--- Full paths (find) ---"
+          find "$GITHUB_WORKSPACE" -type f -o -type d | sort          
+
       # Scan
       - name: Sonar scan
         uses: sonarsource/sonarqube-scan-action@v2
