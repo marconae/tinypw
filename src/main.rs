@@ -2,6 +2,7 @@ mod password;
 mod password_test;
 
 use crate::password::{CharacterMode, RandomPassword, DEFAULT_LENGTH};
+use arboard::Clipboard;
 use clap::Parser;
 use std::iter;
 use std::process::ExitCode;
@@ -29,21 +30,56 @@ struct Args {
 fn main() -> ExitCode {
     let args = Args::parse();
 
-    let pw = get_random_password(args);
+    let pw = get_random_password(&args);
     let pw_str = pw.generate();
-
 
     println!("Password: {}", pw_str);
     println!("{}", render_strength_bar(&pw_str));
 
+    // Optionally copy to clipboard first to avoid racing with any later prints
+    if args.to_clipboard {
+        match set_clipboard(&pw_str) {
+            Ok(()) => println!("Password copied to clipboard."),
+            Err(err) => eprintln!("Warning: failed to copy to clipboard: {}", err),
+        }
+    }
+
     ExitCode::SUCCESS
 }
 
-fn get_random_password(args: Args) -> RandomPassword {
+fn set_clipboard(s: &str) -> Result<(), String> {
+    let mut cb = Clipboard::new().map_err(|e| format!("{}", e))?;
+    cb.set_text(s.to_string()).map_err(|e| format!("{}", e))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    // brings add() into scope
+
+    #[test]
+    fn test_set_clipboard() {
+        let s = "test";
+
+        match set_clipboard(&s) {
+            Ok(()) => assert!(true),
+            Err(err) => {
+                eprintln!("Failed to set clipboard: {}", err);
+                assert!(false)
+            }
+        }
+
+        match Clipboard::new().unwrap().get_text() {
+            Ok(text) => assert_eq!(text, s.to_string()),
+            Err(_) => assert!(false),
+        }
+    }
+}
+
+fn get_random_password(args: &Args) -> RandomPassword {
     let include_numbers = args.mode.contains('n');
     let include_symbols = args.mode.contains('s');
     let exclude_similars = args.mode.contains('e');
-    let extra_chars = args.extra_chars;
 
     let character_mode = match (
         args.mode.contains('u'),
@@ -61,7 +97,7 @@ fn get_random_password(args: Args) -> RandomPassword {
         .include_numbers(include_numbers)
         .include_symbols(include_symbols)
         .exclude_similar(exclude_similars)
-        .extra_chars(extra_chars)
+        .extra_chars(args.extra_chars.clone())
         .build()
 }
 
