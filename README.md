@@ -41,6 +41,15 @@ Password: hzdtx57jj2horb0x8dqh
 [█████████████████████░░░]  86.8% strong 😎 (78.14 bits entropy)
 ```
 
+Copy to clipboard with `-c`:
+
+```
+> tinypw -c
+Password: HLCY2vvsanaQurdG
+[████████████████░░░░░░░░]  67.7% strong 😎 (60.92 bits entropy)
+Password copied to clipboard.
+```
+
 ## Defaults
 
 - Length: 16
