@@ -102,7 +102,7 @@ pub struct RandomPasswordBuilder {
     include_numbers: bool,
     include_symbols: bool,
     exclude_similar: bool,
-    extra_chars: Vec<char>,
+    extra_chars: String,
 }
 
 impl Default for RandomPasswordBuilder {
@@ -113,7 +113,7 @@ impl Default for RandomPasswordBuilder {
             include_numbers: DEFAULT_INCLUDE_NUMBERS,
             include_symbols: DEFAULT_INCLUDE_SYMBOLS,
             exclude_similar: DEFAULT_EXCLUDE_SIMILAR,
-            extra_chars: Vec::new(),
+            extra_chars: String::new(),
         }
     }
 }
@@ -144,7 +144,7 @@ impl RandomPasswordBuilder {
         self
     }
 
-    pub fn extra_chars(mut self, chars: Vec<char>) -> Self {
+    pub fn extra_chars(mut self, chars: String) -> Self {
         self.extra_chars = chars;
         self
     }
@@ -172,7 +172,8 @@ impl RandomPasswordBuilder {
             base_string.retain(|c| !SIMILAR_SYMBOLS.contains(c));
         }
 
-        self.extra_chars.iter().for_each(|c| base_string.push(*c));
+        base_string.push_str(&self.extra_chars);
+
         base_string
     }
 
