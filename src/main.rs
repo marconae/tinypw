@@ -1,6 +1,7 @@
 mod password;
 mod password_test;
 
+use std::iter;
 use std::process::ExitCode;
 use crate::password::{CharacterMode, RandomPassword, DEFAULT_LENGTH};
 use clap::Parser;
@@ -30,11 +31,11 @@ fn main() -> ExitCode {
 
     let pw = get_random_password(args);
     let pw_str = pw.generate();
-    let strength = password::entropy_bits(&pw_str);
+    let pw_entropy = password::entropy_bits(&pw_str);
 
     println!("Password: {}", pw_str);
-    println!("{}", render_strength_bar(strength));
-    println!("Entropy: {:.2} bits", strength);
+    println!("{}", render_strength_bar(pw_entropy));
+    println!("Entropy: {:.2} bits", pw_entropy);
 
     ExitCode::SUCCESS
 }
@@ -89,18 +90,22 @@ fn render_strength_bar(entropy_bits: f64) -> String {
     let cap = 90.0;
     let pct = (entropy_bits / cap).clamp(0.0, 1.0);
     let width = 24usize;
-    let filled = (pct * width as f64).round() as usize;
+
+    let count_filled_blocks = (pct * width as f64).round() as usize;
+    let count_empty_blocks = width - count_filled_blocks;
 
     let filled_block = '█';
     let empty_block = '░';
 
     let label = password::strength_label(entropy_bits);
+    let emoji = strength_emoji(label);
+
     let color = strength_color(label);
     let reset = "\x1b[0m";
 
-    let bar: String = std::iter::repeat(filled_block).take(filled)
-        .chain(std::iter::repeat(empty_block).take(width - filled))
+    let bar: String = iter::repeat_n(filled_block, count_filled_blocks)
+        .chain(iter::repeat_n(empty_block, count_empty_blocks))
         .collect();
 
-    format!("{color}[{bar}] {reset}{:>5.1}% {label} {}", pct * 100.0, strength_emoji(label))
+    format!("{color}[{bar}] {reset}{:>5.1}% {label} {}", pct * 100.0, emoji)
 }

@@ -53,7 +53,7 @@ impl RandomPassword {
 
 /// Calculate Shannon entropy (in bits) for passwords generated with this configuration.
 /// Assumes independent uniform selection over the configured character set.
-pub fn entropy_bits(str: &String) -> f64 {
+pub fn entropy_bits(str: &str) -> f64 {
     let length = str.len() as f64;
     let pool_size = unique_chars(str) as f64;
     if length == 0.0 || pool_size <= 1.0 {
