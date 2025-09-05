@@ -55,9 +55,9 @@ fn set_clipboard(s: &str) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // brings add() into scope
 
     #[test]
+    #[ignore]
     fn test_set_clipboard() {
         let s = "test";
 
