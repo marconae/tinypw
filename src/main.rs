@@ -27,22 +27,6 @@ pub struct Args {
     pub extra_chars: String,
 }
 
-impl Args {
-    /// Construct Args programmatically without CLI parsing.
-    fn new(length: Option<usize>
-           , to_clipboard: bool
-           , mode: impl Into<String>
-           , extra_chars: impl Into<String>) -> Self {
-        Self { length, to_clipboard, mode: mode.into(), extra_chars: extra_chars.into() }
-    }
-}
-
-impl Default for Args {
-    fn default() -> Self {
-        Self { length: None, to_clipboard: false, mode: "ulnse".to_string(), extra_chars: String::new() }
-    }
-}
-
 fn main() -> ExitCode {
     let args = Args::parse();
 
@@ -144,6 +128,15 @@ fn render_strength_bar(pw_str: &str) -> String {
 mod tests {
     use super::*;
     use crate::password::LETTERS_UPPER;
+
+    impl Args {
+        fn new(length: Option<usize>
+               , to_clipboard: bool
+               , mode: impl Into<String>
+               , extra_chars: impl Into<String>) -> Self {
+            Self { length, to_clipboard, mode: mode.into(), extra_chars: extra_chars.into() }
+        }
+    }
 
     #[test]
     fn test_get_random_password() {
