@@ -7,24 +7,40 @@ use clap::Parser;
 use std::iter;
 use std::process::ExitCode;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 #[command(name = "tinypw", about = "Yet another tiny CLI tool to generate passwords")]
-struct Args {
+pub struct Args {
     /// Set the password length
     #[arg(short = 'l', long = "length")]
-    length: Option<usize>,
+    pub length: Option<usize>,
 
     /// Copy password to clipboard
     #[arg(short = 'c', long = "clipboard", default_value_t = false)]
-    to_clipboard: bool,
+    pub to_clipboard: bool,
 
     /// Mode: include u=uppercase l=lowercase s=symbols n=numbers e=exclude similars
     #[arg(short = 'm', long = "mode", default_value = "ulnse")]
-    mode: String,
+    pub mode: String,
 
     /// Extra chars to add to the base set of chars
     #[arg(short = 'e', long = "extra", default_value = "")]
-    extra_chars: String,
+    pub extra_chars: String,
+}
+
+impl Args {
+    /// Construct Args programmatically without CLI parsing.
+    fn new(length: Option<usize>
+           , to_clipboard: bool
+           , mode: impl Into<String>
+           , extra_chars: impl Into<String>) -> Self {
+        Self { length, to_clipboard, mode: mode.into(), extra_chars: extra_chars.into() }
+    }
+}
+
+impl Default for Args {
+    fn default() -> Self {
+        Self { length: None, to_clipboard: false, mode: "ulnse".to_string(), extra_chars: String::new() }
+    }
 }
 
 fn main() -> ExitCode {
@@ -50,30 +66,6 @@ fn main() -> ExitCode {
 fn set_clipboard(s: &str) -> Result<(), String> {
     let mut cb = Clipboard::new().map_err(|e| format!("{}", e))?;
     cb.set_text(s.to_string()).map_err(|e| format!("{}", e))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    #[ignore]
-    fn test_set_clipboard() {
-        let s = "test";
-
-        match set_clipboard(&s) {
-            Ok(()) => assert!(true),
-            Err(err) => {
-                eprintln!("Failed to set clipboard: {}", err);
-                assert!(false)
-            }
-        }
-
-        match Clipboard::new().unwrap().get_text() {
-            Ok(text) => assert_eq!(text, s.to_string()),
-            Err(_) => assert!(false),
-        }
-    }
 }
 
 fn get_random_password(args: &Args) -> RandomPassword {
@@ -121,8 +113,6 @@ fn strength_emoji(label: &str) -> &'static str {
     }
 }
 
-/// Render a colored progress bar based on entropy (bits).
-/// Bar caps at 80 bits for visualization.
 fn render_strength_bar(pw_str: &str) -> String {
     let entropy_bits = password::entropy_bits(&pw_str);
 
@@ -147,5 +137,48 @@ fn render_strength_bar(pw_str: &str) -> String {
         .chain(iter::repeat_n(empty_block, count_empty_blocks))
         .collect();
 
-    format!("{color}[{bar}] {reset}{:>5.1}% {label} {} ({:.2} bits entropy)", pct * 100.0, emoji, entropy_bits)
+    format!("{color}[{bar}] {reset}{:>5.1}% {label} {}", pct * 100.0, emoji)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::password::LETTERS_UPPER;
+
+    #[test]
+    fn test_get_random_password() {
+        // Programmatic construction
+        let args = Args::new(Some(4), false, "ulnse", "");
+        let rnd_pw = get_random_password(&args);
+        assert_eq!(rnd_pw.length, 4);
+
+        // When mode contains 'u' and 'l', base_string includes both cases; check uppercase present among base.
+        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+    }
+
+    #[test]
+    fn test_strength_bar() {
+        let actual = render_strength_bar("4kVRwqf73dS*Iu7W");
+        assert!(actual.contains("strong"));
+        assert!(actual.contains("69.5%"));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_set_clipboard() {
+        let s = "test";
+
+        match set_clipboard(&s) {
+            Ok(()) => assert!(true),
+            Err(err) => {
+                eprintln!("Failed to set clipboard: {}", err);
+                assert!(false)
+            }
+        }
+
+        match Clipboard::new().unwrap().get_text() {
+            Ok(text) => assert_eq!(text, s.to_string()),
+            Err(_) => assert!(false),
+        }
+    }
 }
