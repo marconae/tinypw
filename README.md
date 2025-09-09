@@ -52,6 +52,11 @@ Password: HLCY2vvsanaQurdG
 Password copied to clipboard.
 ```
 
+## Planned for the future
+
+* Support to generate multiple passwords?
+* Support for quiet mode and just return the password?
+
 ## Defaults
 
 - Length: 16
