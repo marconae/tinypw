@@ -23,7 +23,7 @@ pub struct Args {
     pub mode: String,
 
     /// Extra chars to add to the base set of chars
-    #[arg(short = 'e', long = "extra", default_value = "")]
+    #[arg(short = 'x', long = "extra", default_value = "")]
     pub extra_chars: String,
 }
 
