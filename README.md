@@ -16,7 +16,7 @@ Default behaviour:
 ```
 > tinypw
 Password: GLkuLb(RsK55Y(Y8
-[███████████████░░░░░░░░░]  63.7% good 🙂 (57.36 bits entropy)
+[███████████████░░░░░░░░░]  63.7% good 🙂
 ```
 
 Set the length with `tinypw -l 20`:
@@ -24,7 +24,7 @@ Set the length with `tinypw -l 20`:
 ```
 > tinypw -l 20
 Password: Fphb5nCbg6XZscn$5zD*
-[██████████████████████░░]  90.8% strong 😎 (81.75 bits entropy)
+[██████████████████████░░]  90.8% strong 😎
 ```
 
 Define the character set with `-m <mode>` where mode is a combination of letters:
@@ -40,7 +40,7 @@ Example: just lowercase letters and numbers:
 ```
 > tinypw -l 20 -m ln
 Password: hzdtx57jj2horb0x8dqh
-[█████████████████████░░░]  86.8% strong 😎 (78.14 bits entropy)
+[█████████████████████░░░]  86.8% strong 😎
 ```
 
 Add extra characters with `-x <extra_chars>`.
@@ -58,7 +58,7 @@ Copy to clipboard with `-c`:
 ```
 > tinypw -c
 Password: HLCY2vvsanaQurdG
-[████████████████░░░░░░░░]  67.7% strong 😎 (60.92 bits entropy)
+[████████████████░░░░░░░░]  67.7% strong 😎
 Password copied to clipboard.
 ```
 
