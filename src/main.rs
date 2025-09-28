@@ -140,6 +140,7 @@ fn render_strength_bar(pw_str: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use password::{LETTERS_LOWER, NUMBERS, SIMILAR_SYMBOLS, SYMBOLS};
     use super::*;
     use crate::password::LETTERS_UPPER;
 
@@ -187,5 +188,62 @@ mod tests {
             Ok(text) => assert_eq!(text, s.to_string()),
             Err(_) => assert!(false),
         }
+    }
+
+    #[test]
+    fn test_default_length_when_none() {
+        let args = Args::new(None, false, "ulnse", "");
+        let rnd_pw = get_random_password(&args);
+        assert_eq!(rnd_pw.length, DEFAULT_LENGTH);
+    }
+
+    #[test]
+    fn test_character_mode_upper_only() {
+        // Mode contains 'u' but not 'l' => Upper only for letters
+        let args = Args::new(Some(8), false, "un", "");
+        let rnd_pw = get_random_password(&args);
+
+        assert!(LETTERS_LOWER.chars().all(|c| !rnd_pw.base_string.contains(c)));
+        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+    }
+
+    #[test]
+    fn test_character_mode_lower_only() {
+        let args = Args::new(Some(8), false, "ln", "");
+        let rnd_pw = get_random_password(&args);
+
+        assert!(password::LETTERS_UPPER.chars().all(|c| !rnd_pw.base_string.contains(c)));
+        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_LOWER.contains(c)));
+    }
+
+    #[test]
+    fn test_character_mode_default_when_neither_u_nor_l() {
+        // Neither 'u' nor 'l' present => use DEFAULT_CHARACTER_MODE (LowerUpper)
+        // Include numbers and symbols; exclude similar
+        let args = Args::new(Some(8), false, "nse", "");
+        let rnd_pw = get_random_password(&args);
+
+        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_LOWER.contains(c)));
+        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+        assert!(rnd_pw.base_string.chars().any(|c| NUMBERS.contains(c)));
+        assert!(rnd_pw.base_string.chars().any(|c| SYMBOLS.contains(c)));
+        assert!(SIMILAR_SYMBOLS.chars().all(|c| !rnd_pw.base_string.contains(c)));
+    }
+
+    #[test]
+    fn test_exclude_numbers_and_symbols_when_missing_in_mode() {
+        // Mode has only letters; numbers and symbols should be excluded
+        let args = Args::new(Some(8), false, "ul", "");
+        let rnd_pw = get_random_password(&args);
+        assert!(NUMBERS.chars().all(|c| !rnd_pw.base_string.contains(c)));
+        assert!(SYMBOLS.chars().all(|c| !rnd_pw.base_string.contains(c)));
+    }
+
+    #[test]
+    fn test_extra_chars_are_appended() {
+        let extra = "~º";
+        let args = Args::new(Some(8), false, "ulnse", extra);
+        let rnd_pw = get_random_password(&args);
+        assert!(extra.chars().all(|c| rnd_pw.base_string.contains(c)));
     }
 }
