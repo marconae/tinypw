@@ -19,7 +19,7 @@ Password: GLkuLb(RsK55Y(Y8
 [███████████████░░░░░░░░░]  63.7% good 🙂 (57.36 bits entropy)
 ```
 
-Set the length with `tinypw -l 24`:
+Set the length with `tinypw -l 20`:
 
 ```
 > tinypw -l 20
@@ -27,7 +27,7 @@ Password: Fphb5nCbg6XZscn$5zD*
 [██████████████████████░░]  90.8% strong 😎 (81.75 bits entropy)
 ```
 
-Select character set with mode `-m <mode>` where mode is a combination of letters:
+Define the character set with `-m <mode>` where mode is a combination of letters:
 
 - `u` = include uppercase `A–Z`
 - `l` = include lowercase `a–z`
@@ -41,6 +41,16 @@ Example: just lowercase letters and numbers:
 > tinypw -l 20 -m ln
 Password: hzdtx57jj2horb0x8dqh
 [█████████████████████░░░]  86.8% strong 😎 (78.14 bits entropy)
+```
+
+Add extra characters with `-e <extra_chars>`.
+
+Example: length 20, use uppercase, lowercase and numbers and also include `;:?!"'`
+
+```
+> tinypw -l 20 -m uln -e ";:?\!\"'"
+Password: wlw7qp!9fEnataRS7ap:
+[█████████████████████░░░]  86.8% strong 😎
 ```
 
 Copy to clipboard with `-c`:
@@ -68,7 +78,7 @@ Password copied to clipboard.
 
 - With Rust installed: clone this repository and run `cargo build --release`.
 - Optional: add to PATH: copy `target/release/tinypw` somewhere on your PATH.
-- From source without release profile: `cargo run --` followed by options shown below.
+- From source without a release profile: `cargo run --` followed by options shown below.
 
 ## How it works (brief)
 
