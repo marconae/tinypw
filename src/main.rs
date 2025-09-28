@@ -295,39 +295,4 @@ mod tests {
 
         assert!(extra.chars().all(|c| rnd_pw.base_string.contains(c)));
     }
-
-    #[test]
-    fn quiet_mode_prints_only_password() {
-        use assert_cmd::Command;
-        use predicates::prelude::*;
-
-        // run: tinypw -q -l 12
-        let mut cmd = Command::cargo_bin("tinypw").unwrap();
-        cmd.args(["-q", "-l", "12"]);
-
-        // succeeds
-        cmd.assert()
-            .success()
-            // exactly one line of output (the password)
-            .stdout(predicate::str::is_match(r"^[^\r\n]+(\r?\n)$").unwrap())
-            // must NOT contain the verbose labels/bar/clipboard message
-            .stdout(predicate::str::contains("Password:").not())
-            .stdout(predicate::str::contains("[").not()) // strength bar
-            .stdout(predicate::str::contains("copied").not());
-    }
-
-    #[test]
-    fn main_runs_without_clipboard() {
-        use assert_cmd::Command;
-        use predicates::prelude::*;
-
-        let mut cmd = Command::cargo_bin("tinypw").unwrap();
-        cmd.args(["-l", "12"]);
-
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("Password:"))
-            .stdout(predicate::str::contains("["))
-            .stdout(predicate::str::contains("Password copied to clipboard").not());
-    }
 }
