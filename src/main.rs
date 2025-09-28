@@ -1,14 +1,17 @@
 mod password;
 mod password_test;
 
-use crate::password::{CharacterMode, RandomPassword, DEFAULT_LENGTH};
+use crate::password::{CharacterMode, DEFAULT_LENGTH, RandomPassword};
 use arboard::Clipboard;
 use clap::Parser;
 use std::iter;
 use std::process::ExitCode;
 
 #[derive(Debug, Parser, Clone)]
-#[command(name = "tinypw", about = "Yet another tiny CLI tool to generate passwords")]
+#[command(
+    name = "tinypw",
+    about = "Yet another tiny CLI tool to generate passwords"
+)]
 pub struct Args {
     /// Set the password length
     #[arg(short = 'l', long = "length")]
@@ -18,11 +21,11 @@ pub struct Args {
     #[arg(short = 'c', long = "clipboard", default_value_t = false)]
     pub to_clipboard: bool,
 
-    /// Quiet mode: print only the password
+    /// Print only the password
     #[arg(short = 'q', long = "quiet", default_value_t = false)]
     pub quiet: bool,
 
-    /// Mode: include u=uppercase l=lowercase s=symbols n=numbers e=exclude similars
+    /// Include u=uppercase l=lowercase s=symbols n=numbers e=exclude similar chars
     #[arg(short = 'm', long = "mode", default_value = "ulnse")]
     pub mode: String,
 
@@ -58,10 +61,7 @@ fn get_random_password(args: &Args) -> RandomPassword {
     let include_symbols = args.mode.contains('s');
     let exclude_similar_chars = args.mode.contains('e');
 
-    let character_mode = match (
-        args.mode.contains('u'),
-        args.mode.contains('l'),
-    ) {
+    let character_mode = match (args.mode.contains('u'), args.mode.contains('l')) {
         (true, true) => CharacterMode::LowerUpper,
         (true, false) => CharacterMode::Upper,
         (false, true) => CharacterMode::Lower,
@@ -95,10 +95,10 @@ fn copy_to_clipboard(s: &str) -> bool {
 
 fn strength_color(label: &str) -> &'static str {
     match label {
-        "weak" => "\x1b[31m",  // red
-        "fair" => "\x1b[33m",  // yellow
-        "good" => "\x1b[36m",  // cyan
-        _ => "\x1b[32m",       // green
+        "weak" => "\x1b[31m", // red
+        "fair" => "\x1b[33m", // yellow
+        "good" => "\x1b[36m", // cyan
+        _ => "\x1b[32m",      // green
     }
 }
 
@@ -118,7 +118,6 @@ fn render_strength_bar(pw_str: &str) -> String {
     let pct = (entropy_bits / cap).clamp(0.0, 1.0);
     let width = 24usize;
 
-
     let count_filled_blocks = (pct * width as f64).round() as usize;
     let count_empty_blocks = width - count_filled_blocks;
 
@@ -135,21 +134,33 @@ fn render_strength_bar(pw_str: &str) -> String {
         .chain(iter::repeat_n(empty_block, count_empty_blocks))
         .collect();
 
-    format!("{color}[{bar}] {reset}{:>5.1}% {label} {}", pct * 100.0, emoji)
+    format!(
+        "{color}[{bar}] {reset}{:>5.1}% {label} {}",
+        pct * 100.0,
+        emoji
+    )
 }
 
 #[cfg(test)]
 mod tests {
-    use password::{LETTERS_LOWER, NUMBERS, SIMILAR_SYMBOLS, SYMBOLS};
     use super::*;
     use crate::password::LETTERS_UPPER;
+    use password::{LETTERS_LOWER, NUMBERS, SIMILAR_SYMBOLS, SYMBOLS};
 
     impl Args {
-        fn new(length: Option<usize>
-               , to_clipboard: bool
-               , mode: impl Into<String>
-               , extra_chars: impl Into<String>) -> Self {
-            Self { length, to_clipboard, quiet: false, mode: mode.into(), extra_chars: extra_chars.into() }
+        fn new(
+            length: Option<usize>,
+            to_clipboard: bool,
+            mode: impl Into<String>,
+            extra_chars: impl Into<String>,
+        ) -> Self {
+            Self {
+                length,
+                to_clipboard,
+                quiet: false,
+                mode: mode.into(),
+                extra_chars: extra_chars.into(),
+            }
         }
     }
 
@@ -161,7 +172,12 @@ mod tests {
         assert_eq!(rnd_pw.length, 4);
 
         // When mode contains 'u' and 'l', base_string includes both cases; check uppercase present among base.
-        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+        assert!(
+            rnd_pw
+                .base_string
+                .chars()
+                .any(|c| LETTERS_UPPER.contains(c))
+        );
     }
 
     #[test]
@@ -203,8 +219,17 @@ mod tests {
         let args = Args::new(Some(8), false, "un", "");
         let rnd_pw = get_random_password(&args);
 
-        assert!(LETTERS_LOWER.chars().all(|c| !rnd_pw.base_string.contains(c)));
-        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+        assert!(
+            LETTERS_LOWER
+                .chars()
+                .all(|c| !rnd_pw.base_string.contains(c))
+        );
+        assert!(
+            rnd_pw
+                .base_string
+                .chars()
+                .any(|c| LETTERS_UPPER.contains(c))
+        );
     }
 
     #[test]
@@ -212,8 +237,17 @@ mod tests {
         let args = Args::new(Some(8), false, "ln", "");
         let rnd_pw = get_random_password(&args);
 
-        assert!(password::LETTERS_UPPER.chars().all(|c| !rnd_pw.base_string.contains(c)));
-        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_LOWER.contains(c)));
+        assert!(
+            LETTERS_UPPER
+                .chars()
+                .all(|c| !rnd_pw.base_string.contains(c))
+        );
+        assert!(
+            rnd_pw
+                .base_string
+                .chars()
+                .any(|c| LETTERS_LOWER.contains(c))
+        );
     }
 
     #[test]
@@ -223,11 +257,25 @@ mod tests {
         let args = Args::new(Some(8), false, "nse", "");
         let rnd_pw = get_random_password(&args);
 
-        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_LOWER.contains(c)));
-        assert!(rnd_pw.base_string.chars().any(|c| LETTERS_UPPER.contains(c)));
+        assert!(
+            rnd_pw
+                .base_string
+                .chars()
+                .any(|c| LETTERS_LOWER.contains(c))
+        );
+        assert!(
+            rnd_pw
+                .base_string
+                .chars()
+                .any(|c| LETTERS_UPPER.contains(c))
+        );
         assert!(rnd_pw.base_string.chars().any(|c| NUMBERS.contains(c)));
         assert!(rnd_pw.base_string.chars().any(|c| SYMBOLS.contains(c)));
-        assert!(SIMILAR_SYMBOLS.chars().all(|c| !rnd_pw.base_string.contains(c)));
+        assert!(
+            SIMILAR_SYMBOLS
+                .chars()
+                .all(|c| !rnd_pw.base_string.contains(c))
+        );
     }
 
     #[test]
@@ -244,6 +292,42 @@ mod tests {
         let extra = "~º";
         let args = Args::new(Some(8), false, "ulnse", extra);
         let rnd_pw = get_random_password(&args);
+
         assert!(extra.chars().all(|c| rnd_pw.base_string.contains(c)));
+    }
+
+    #[test]
+    fn quiet_mode_prints_only_password() {
+        use assert_cmd::Command;
+        use predicates::prelude::*;
+
+        // run: tinypw -q -l 12
+        let mut cmd = Command::cargo_bin("tinypw").unwrap();
+        cmd.args(["-q", "-l", "12"]);
+
+        // succeeds
+        cmd.assert()
+            .success()
+            // exactly one line of output (the password)
+            .stdout(predicate::str::is_match(r"^[^\r\n]+(\r?\n)$").unwrap())
+            // must NOT contain the verbose labels/bar/clipboard message
+            .stdout(predicate::str::contains("Password:").not())
+            .stdout(predicate::str::contains("[").not()) // strength bar
+            .stdout(predicate::str::contains("copied").not());
+    }
+
+    #[test]
+    fn main_runs_without_clipboard() {
+        use assert_cmd::Command;
+        use predicates::prelude::*;
+
+        let mut cmd = Command::cargo_bin("tinypw").unwrap();
+        cmd.args(["-l", "12"]);
+
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("Password:"))
+            .stdout(predicate::str::contains("["))
+            .stdout(predicate::str::contains("Password copied to clipboard").not());
     }
 }
