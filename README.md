@@ -62,10 +62,17 @@ Password: HLCY2vvsanaQurdG
 Password copied to clipboard.
 ```
 
+Quiet mode: print only the password with `-q`:
+
+```
+> tinypw -q
+HLCY2vvsanaQurdG
+```
+
 ## Planned for the future
 
-* Support to generate multiple passwords?
-* Support for quiet mode and just return the password?
+- [x] Support for quiet mode and just return the password
+- [ ] Generate multiple passwords with parameter `-n`
 
 ## Defaults
 

@@ -18,6 +18,10 @@ pub struct Args {
     #[arg(short = 'c', long = "clipboard", default_value_t = false)]
     pub to_clipboard: bool,
 
+    /// Quiet mode: print only the password
+    #[arg(short = 'q', long = "quiet", default_value_t = false)]
+    pub quiet: bool,
+
     /// Mode: include u=uppercase l=lowercase s=symbols n=numbers e=exclude similars
     #[arg(short = 'm', long = "mode", default_value = "ulnse")]
     pub mode: String,
@@ -33,29 +37,26 @@ fn main() -> ExitCode {
     let pw = get_random_password(&args);
     let pw_str = pw.generate();
 
-    println!("Password: {}", pw_str);
-    println!("{}", render_strength_bar(&pw_str));
+    let set_clipboard = args.to_clipboard && copy_to_clipboard(&pw_str);
 
-    // Optionally copy to clipboard first to avoid racing with any later prints
-    if args.to_clipboard {
-        match set_clipboard(&pw_str) {
-            Ok(()) => println!("Password copied to clipboard."),
-            Err(err) => eprintln!("Warning: failed to copy to clipboard: {}", err),
+    // Quiet mode: print only the password and suppress any extra output
+    if args.quiet {
+        println!("{}", pw_str);
+    } else {
+        println!("Password: {}", pw_str);
+        println!("{}", render_strength_bar(&pw_str));
+        if set_clipboard {
+            println!("Password copied to clipboard");
         }
     }
 
     ExitCode::SUCCESS
 }
 
-fn set_clipboard(s: &str) -> Result<(), String> {
-    let mut cb = Clipboard::new().map_err(|e| format!("{}", e))?;
-    cb.set_text(s.to_string()).map_err(|e| format!("{}", e))
-}
-
 fn get_random_password(args: &Args) -> RandomPassword {
     let include_numbers = args.mode.contains('n');
     let include_symbols = args.mode.contains('s');
-    let exclude_similars = args.mode.contains('e');
+    let exclude_similar_chars = args.mode.contains('e');
 
     let character_mode = match (
         args.mode.contains('u'),
@@ -72,12 +73,25 @@ fn get_random_password(args: &Args) -> RandomPassword {
         .character_mode(character_mode)
         .include_numbers(include_numbers)
         .include_symbols(include_symbols)
-        .exclude_similar(exclude_similars)
+        .exclude_similar(exclude_similar_chars)
         .extra_chars(args.extra_chars.clone())
         .build()
 }
 
-// Add this alongside your password helpers
+fn set_clipboard(s: &str) -> Result<(), String> {
+    let mut cb = Clipboard::new().map_err(|e| format!("{}", e))?;
+    cb.set_text(s.to_string()).map_err(|e| format!("{}", e))
+}
+
+fn copy_to_clipboard(s: &str) -> bool {
+    match set_clipboard(s) {
+        Ok(()) => true,
+        Err(err) => {
+            eprintln!("Warning: failed to copy to clipboard: {}", err);
+            false
+        }
+    }
+}
 
 fn strength_color(label: &str) -> &'static str {
     match label {
@@ -134,7 +148,7 @@ mod tests {
                , to_clipboard: bool
                , mode: impl Into<String>
                , extra_chars: impl Into<String>) -> Self {
-            Self { length, to_clipboard, mode: mode.into(), extra_chars: extra_chars.into() }
+            Self { length, to_clipboard, quiet: false, mode: mode.into(), extra_chars: extra_chars.into() }
         }
     }
 
