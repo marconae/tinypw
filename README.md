@@ -43,12 +43,12 @@ Password: hzdtx57jj2horb0x8dqh
 [█████████████████████░░░]  86.8% strong 😎 (78.14 bits entropy)
 ```
 
-Add extra characters with `-e <extra_chars>`.
+Add extra characters with `-x <extra_chars>`.
 
 Example: length 20, use uppercase, lowercase and numbers and also include `;:?!"'`
 
 ```
-> tinypw -l 20 -m uln -e ";:?\!\"'"
+> tinypw -l 20 -m uln -x ";:?\!\"'"
 Password: wlw7qp!9fEnataRS7ap:
 [█████████████████████░░░]  86.8% strong 😎
 ```
