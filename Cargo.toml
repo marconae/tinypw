@@ -2,7 +2,7 @@
 name = "tinypw"
 version = "0.2.0"
 edition = "2024"
-authors = ["Marco Naetlitz <marco@naetlitz.de>"]
+authors = ["Marco Naetlitz"]
 description = "Yet another tiny CLI tool to generate passwords"
 license = "MIT"
 readme = "README.md"
