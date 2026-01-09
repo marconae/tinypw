@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150">
+  <defs>
+    <linearGradient id="termGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="100%" style="stop-color:#4F46E5"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Terminal window background -->
+  <rect x="20" y="30" width="160" height="120" rx="12" ry="12" fill="#1E1E2E"/>
+  
+  <!-- Terminal header bar -->
+  <rect x="20" y="30" width="160" height="28" rx="12" ry="0" fill="#2D2D3D"/>
+  <rect x="20" y="46" width="160" height="12" fill="#2D2D3D"/>
+  
+  <!-- Traffic light buttons -->
+  <circle cx="38" cy="44" r="5" fill="#FF5F57"/>
+  <circle cx="54" cy="44" r="5" fill="#FFBD2E"/>
+  <circle cx="70" cy="44" r="5" fill="#28CA42"/>
+  
+  <!-- Prompt -->
+  <text x="32" y="85" fill="#10B981" font-family="monospace" font-size="14" font-weight="bold">&gt;</text>
+  
+  <!-- "tinypw" command -->
+  <text x="48" y="85" fill="#F8F8F2" font-family="monospace" font-size="14">tinypw</text>
+  
+  <!-- Password output with asterisks -->
+  <text x="32" y="110" fill="#FF9F43" font-family="monospace" font-size="14">****</text>
+  <text x="68" y="110" fill="#FF9F43" font-family="monospace" font-size="14">****</text>
+  <text x="104" y="110" fill="#FF9F43" font-family="monospace" font-size="14">****</text>
+  
+  <!-- Blinking cursor -->
+  <rect x="140" y="98" width="8" height="16" fill="#10B981">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- Strength indicator bar -->
+  <rect x="32" y="122" width="100" height="6" rx="3" fill="#3D3D4D"/>
+  <rect x="32" y="122" width="75" height="6" rx="3" fill="url(#termGrad)"/>
+  
+  <!-- Emoji -->
+  <text x="140" y="130" font-size="14">😎</text>
+  
+  <!-- Logo text -->
+  <!--
+  <text x="100" y="175" fill="#333" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" text-anchor="middle" letter-spacing="0.5">tinypw</text>
+  -->
+</svg>
