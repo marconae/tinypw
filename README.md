@@ -4,7 +4,7 @@
 
 # tinypw
 
-![CI](https://github.com/marconae/tinypw/actions/workflows/ci.yml/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=marconae_tinypw&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=marconae_tinypw) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=marconae_tinypw&metric=coverage)](https://sonarcloud.io/summary/new_code?id=marconae_tinypw)
+![CI](https://github.com/marconae/tinypw/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/marconae/tinypw/graph/badge.svg)](https://codecov.io/gh/marconae/tinypw)
 
 A tiny, fast CLI tool to generate random passwords.
 

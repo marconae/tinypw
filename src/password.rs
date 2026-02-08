@@ -1,6 +1,6 @@
 use crate::password::CharacterMode::LowerUpper;
-use rand::distr::Uniform;
 use rand::Rng;
+use rand::distr::Uniform;
 
 pub const LETTERS_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
 pub const LETTERS_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

@@ -112,7 +112,7 @@ fn strength_emoji(label: &str) -> &'static str {
 }
 
 fn render_strength_bar(pw_str: &str) -> String {
-    let entropy_bits = password::entropy_bits(&pw_str);
+    let entropy_bits = password::entropy_bits(pw_str);
 
     let cap = 90.0;
     let pct = (entropy_bits / cap).clamp(0.0, 1.0);
@@ -192,17 +192,16 @@ mod tests {
     fn test_set_clipboard() {
         let s = "test";
 
-        match set_clipboard(&s) {
-            Ok(()) => assert!(true),
+        match set_clipboard(s) {
+            Ok(()) => {}
             Err(err) => {
-                eprintln!("Failed to set clipboard: {}", err);
-                assert!(false)
+                panic!("Failed to set clipboard: {}", err);
             }
         }
 
         match Clipboard::new().unwrap().get_text() {
             Ok(text) => assert_eq!(text, s.to_string()),
-            Err(_) => assert!(false),
+            Err(err) => panic!("Failed to get clipboard: {}", err),
         }
     }
 
