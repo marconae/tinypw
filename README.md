@@ -1,12 +1,16 @@
-<p align="center">
-  <img src="assets/tinypw-logo.svg" alt="tinypw logo">
-</p>
+<div align="center">
+  <img src="assets/tinypw-logo.svg" alt="tinypw logo" width="200">
+
 
 # tinypw
 
 ![CI](https://github.com/marconae/tinypw/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/marconae/tinypw/graph/badge.svg)](https://codecov.io/gh/marconae/tinypw)
 
 A tiny, fast CLI tool to generate random passwords.
+
+</div>
+
+---
 
 ## Motivation
 
@@ -87,9 +91,7 @@ HLCY2vvsanaQurdG
 
 ## Install
 
-- With Rust installed: clone this repository and run `cargo build --release`.
-- Optional: add to PATH: copy `target/release/tinypw` somewhere on your PATH.
-- From source without a release profile: `cargo run --` followed by options shown below.
+With Rust installed: clone this repository and run `cargo install --path .`.
 
 ## How it works (brief)
 
@@ -99,4 +101,12 @@ HLCY2vvsanaQurdG
 
 ## License
 
-- MIT. [See LICENSE](LICENSE).
+[MIT](LICENSE)
+
+---
+
+<div align="center">
+
+Build with Rust 🦀 and made with ❤️ by [marconae](https://deliberate.codes).
+
+</div>
